@@ -1,8 +1,9 @@
 """
 TODO: Write multiple data handlers w/ command line options
-TODO: Add help flags
+TODO: Send visuals along with data pairs
+TODO: Experiment with alternative email servers (other than gmail)
 
-Fetching customer ebird API request and sending it to my email
+Fetching custom ebird API request and sending it via email
 
 You need to write a file (.env) in the same directory with the following variables:
 
@@ -32,6 +33,9 @@ import argparse
 
 load_dotenv()
 
+if os.getenv('TOKEN') == '':
+    raise Exception(f'No token, no bueno')
+
 parser = argparse.ArgumentParser(description="""
 Send custom eBird alerts to an email you designate\n
 You need to write a file (.env) in the same directory with the following variables:\n
@@ -57,7 +61,9 @@ def getNearby():
         url = 'https://api.ebird.org/v2/data/obs/geo/recent?lat=35.2916363&lng=-80.7269854&includeProvisional=true&back=1&maxResults=20'
         headers = {'x-ebirdapitoken': os.getenv('TOKEN')}
         response = requests.get(url, headers=headers)
-        print(response.status_code)
+        if response.status_code != 200:
+            raise ValueError(f'The response status was {response.status_code}')
+            return
         data = response.json()
         
         #saving data to file
@@ -87,14 +93,17 @@ def sendData(RECIPIENT, body):
     message.add_header('To', RECIPIENT)
     message.add_header('Subject','Bird Sightings')
     message.set_content(body)
+    print(message['Content-Type'])
 
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as mailserver:
-        mailserver.starttls()
-        mailserver.login(EMAIL_ADDR, EMAIL_PASS)
-        mailserver.sendmail(EMAIL_ADDR, RECIPIENT, message.as_string())
-        
-    print('finished')
-
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as mailserver:
+            mailserver.starttls()
+            mailserver.login(EMAIL_ADDR, EMAIL_PASS)
+            mailserver.sendmail(EMAIL_ADDR, RECIPIENT, message.as_string())
+            print('finished')
+    except SMTPException as e:
+        print(e)
+        return
 
 
 #prevents code execution if imported
