@@ -4,12 +4,17 @@ TODO: Add help flags
 
 Fetching customer ebird API request and sending it to my email
 
-You need to write a file (.env.txt) in the same directory with the following variables:
+You need to write a file (.env) in the same directory with the following variables:
 
 DEFAULT:    the default gmail to send results to if no -r option is given
 EMAIL:      the gmail you are using to send data
 EMAILPASS:  a password to the gmail you are using to send data
 TOKEN:      a valid eBird token for use with the API
+
+To do this in Windows reliably, use the following commands in terminal
+cd ./path/to/your/project
+touch .env
+notepad .env  (or whatever editor you use)
 
 """
 
@@ -25,46 +30,57 @@ from email.mime.text import MIMEText
 from email.message import EmailMessage
 import argparse
 
+load_dotenv()
 
-c = dotenv_values(".env.txt")#use the full file name, not just .env ; Windows having issues w/ naming the file 
-
-parser = argparse.ArgumentParser(description='set recipient email')
+parser = argparse.ArgumentParser(description="""
+Send custom eBird alerts to an email you designate\n
+You need to write a file (.env) in the same directory with the following variables:\n
+DEFAULT:    the default gmail to send results to if no -r option is given\n
+EMAIL:      the gmail you are using to send data\n
+EMAILPASS:  a password to the gmail you are using to send data\n
+TOKEN:      a valid eBird token for use with the API\n
+e.g. python b.py -r youremail@domain.com\n\n
+""", formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument(
     '-r',
     nargs='?',
-    default=c['DEFAULT'],
-    help='type the email you want the alert sent to')#string type assumed as default
+    default= os.getenv('DEFAULT'),
+    help='the email you want the alert sent to\n defaults to the email set in your .env file')#string type assumed as default
 args = parser.parse_args()
-print(args.r)
+
 
 #function that requests ebird API and returns a string of desired obs data to be send over email
-#Need to make many handlers for different types of calls / alerts
+#Need handlers for different types of calls / alerts
 def getNearby():
-    
-    #Getting the data
-    url = 'https://api.ebird.org/v2/data/obs/geo/recent?lat=35.2916363&lng=-80.7269854&includeProvisional=true&back=1&maxResults=20'
-    headers = {'x-ebirdapitoken': c['TOKEN']}
-    response = requests.get(url, headers=headers)
-    data = json.loads(response.text)#array of dictionaries, one for each obs
 
-    #transforming the data
-    index = [elem['obsDt'] for elem in data]
-    columns = [species['comName']for species in data]
-    test = pd.Series(index=index, data=columns)
-    counts = test.value_counts() # shows counts per species
-    v = pd.DataFrame(data=counts, index=test.array) #test.array shows the keys as a list
-    body = v.to_string() #to_html seems to send the text of html version
-    
-    return body
-
+        #Getting the data
+        url = 'https://api.ebird.org/v2/data/obs/geo/recent?lat=35.2916363&lng=-80.7269854&includeProvisional=true&back=1&maxResults=20'
+        headers = {'x-ebirdapitoken': os.getenv('TOKEN')}
+        response = requests.get(url, headers=headers)
+        print(response.status_code)
+        data = response.json()
+        
+        #saving data to file
+        with open('alertData', 'w') as file:
+                json.dump(data, file)
+            
+        #transforming the data from an array of dictionaries to string of meaningful info
+        index = [elem['obsDt'] for elem in data] # list of strings
+        columns = [species['comName']for species in data]
+        test = pd.Series(index=index, data=columns)
+        counts = test.value_counts() # shows counts per species
+        v = pd.DataFrame(data=counts, index=test.array) #test.array shows the keys as a list
+        body = v.to_string() #to_html seems to send the text of html version
+        
+        return body
 
 #sends data by email to designated recipient from env set gmail  
 def sendData(RECIPIENT, body):
         
     SMTP_SERVER = 'smtp.gmail.com'
     SMTP_PORT = 587
-    EMAIL_ADDR = c['EMAIL']
-    EMAIL_PASS = c['EMAILPASS']
+    EMAIL_ADDR = os.getenv('EMAIL')
+    EMAIL_PASS = os.getenv('EMAILPASS')
 
     message = EmailMessage()
     message.add_header('From', EMAIL_ADDR)

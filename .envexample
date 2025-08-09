@@ -1,0 +1,4 @@
+TOKEN=12characters #request from here https://ebird.org/api/keygen
+EMAIL=the_email_you_are_sending_from_@gmail.com
+EMAILPASS=your_EMAIL_password_or_passcode
+DEFAULT=your_default_recipient_email@gmail.com
