@@ -5,25 +5,25 @@ on: [push]
 jobs:
   #name of the first job
   first-job:
-  #what the jobs run on
-  run-on: ubuntu-latest
-  steps:
-    - name: Setup  Python
-    - uses: actions/setup-python@v6
-      with:
-        python-version: "3.11"
-        cache: pip
+    #what the jobs run on
+    run-on: ubuntu-latest
+    steps:
+      - name: Setup  Python
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
 
-    - name: Install requirements with pip
-      with:
-        python-version: "3.11"
-        cache: pip
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install requirements with pip
+        with:
+          python-version: "3.11"
+          cache: pip
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Pull repository project files
-    - uses: actions/checkout@5
+      - name: Pull repository project files
+      - uses: actions/checkout@5
 
-    - name: Run Unit Tests
-    - run: python -m pytest
+      - name: Run Unit Tests
+      - run: python -m pytest
