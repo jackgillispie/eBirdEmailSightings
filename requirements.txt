@@ -1,0 +1,9 @@
+requests
+os
+dotenv
+Json
+pandas
+matplotlib
+smtplib
+email
+argparse
