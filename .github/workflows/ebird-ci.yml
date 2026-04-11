@@ -7,7 +7,7 @@ jobs:
   first-job:
     #what the jobs run on
     name: name-of-first-job
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Setup  Python
       - uses: actions/setup-python@v6
