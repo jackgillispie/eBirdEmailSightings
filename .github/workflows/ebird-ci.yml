@@ -1,6 +1,6 @@
 name: ebird-ci
 run-name: ${{ github.actor }} is learning GitHub Actions
-on push:
+on: [push]
 #groups together all jobs in a workflow
 jobs:
   #name of the first job
