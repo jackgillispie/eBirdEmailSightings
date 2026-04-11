@@ -9,8 +9,8 @@ jobs:
     name: name-of-first-job
     runs-on: ubuntu-latest
     steps:
-      - name: Setup  Python
-      - uses: actions/setup-python@v6
+      - name: Setup Python
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -24,7 +24,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Pull repository project files
-      - uses: actions/checkout@5
+        uses: actions/checkout@5
 
       - name: Run Unit Tests
       - run: python -m pytest
