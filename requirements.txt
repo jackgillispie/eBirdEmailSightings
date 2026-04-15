@@ -1,10 +1,8 @@
 requests
-os
 dotenv
-Json
+json
 pandas
 matplotlib
 smtplib
-email
 argparse
 pytest
