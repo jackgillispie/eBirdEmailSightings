@@ -1,6 +1,4 @@
 """
-For some reason w+ yields no permission errors, while w does
-
 TODO: Write multiple data handlers w/ command line options
 TODO: Send visuals along with data pairs
 TODO: Experiment with alternative email servers (other than gmail)
@@ -68,8 +66,13 @@ def getNearby():
             raise ValueError(f'The response status was {response.status_code}')
             return "Handled Error"
         data = response.json()
+
+        #
+        this_dir = os.path.dirname(os.path.realpath(__file__))
+        log_path = os.path.join(this_dir, "alertData.txt")
         #saving data to file
-        with open('C:/Users/jackg/Desktop/b/alertData.txt', 'w+') as file:
+        # For some reason w+ yields no permission errors, while w does
+        with open(log_path, 'w+') as file:
                 json.dump(data, file)
 
         #transforming the data from an array of dictionaries to string of meaningful info
